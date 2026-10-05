@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-import json
 from typing import Sequence
 
 from citetrace.llm.base import BaseLLM
 from citetrace.paper.store import JsonPaperStore
 from citetrace.retrieval.base import BaseRetriever
 from citetrace.schemas import Evidence
+from citetrace.utils.json import parse_json_object
 
 
 _SYSTEM = """You are a retrieval planner for research-paper factual QA.
@@ -48,7 +48,7 @@ class LLMRetrievalAgent(BaseRetriever):
 
 def _parse_queries(raw: str) -> list[str]:
     try:
-        obj = json.loads(raw)
+        obj = parse_json_object(raw)
         return [str(x).strip() for x in obj.get("queries", []) if str(x).strip()]
     except Exception:
         return []
