@@ -1,49 +1,237 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>CiteTrace</title>
+  <title>CiteTrace · 课堂演示</title>
   <style>
-    body{font-family:system-ui,sans-serif;max-width:900px;margin:40px auto;padding:0 20px;line-height:1.45}
-    textarea,input,button{font:inherit} input,textarea{width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box}
-    button{padding:9px 14px;cursor:pointer} pre{white-space:pre-wrap;background:#f5f5f5;padding:16px;border-radius:8px}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:24px}.muted{opacity:.7}
+    :root{
+      --bg:#09101f;--panel:#111a31;--panel2:#16213e;--line:#2b3b6f;
+      --text:#f3f6ff;--muted:#a8b3d3;--blue:#6ea8ff;--cyan:#7de2d1;
+      --green:#8ee6a3;--yellow:#ffd27d;--red:#ff9595;--radius:20px;
+      --shadow:0 18px 40px rgba(0,0,0,.28);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;background:
+        radial-gradient(circle at 12% 0%,rgba(88,126,255,.18),transparent 28%),
+        radial-gradient(circle at 95% 5%,rgba(83,214,185,.12),transparent 25%),
+        var(--bg);
+      color:var(--text);
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    }
+    button,input,textarea{font:inherit}
+    .page{max-width:1500px;margin:0 auto;padding:30px}
+    .hero{
+      min-height:260px;border:1px solid rgba(255,255,255,.08);border-radius:28px;
+      background:linear-gradient(135deg,rgba(110,168,255,.12),rgba(125,226,209,.06));
+      box-shadow:var(--shadow);padding:34px;display:flex;flex-direction:column;justify-content:space-between;
+    }
+    .eyebrow{display:inline-flex;align-items:center;width:max-content;gap:8px;padding:7px 11px;border-radius:999px;
+      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:var(--cyan);font-size:13px;font-weight:800}
+    h1{font-size:44px;line-height:1.15;margin:14px 0 12px;letter-spacing:-.03em}
+    .hero p{max-width:980px;color:var(--muted);font-size:17px;line-height:1.8}
+    .hero-foot{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:26px}
+    .stat{padding:16px;border:1px solid rgba(255,255,255,.07);border-radius:16px;background:rgba(255,255,255,.035)}
+    .stat b{display:block;font-size:15px;margin-bottom:7px}.stat span{color:var(--muted);font-size:13px;line-height:1.5}
+    .layout{display:grid;grid-template-columns:1.15fr .85fr;gap:24px;margin-top:24px;align-items:start}
+    .panel{background:rgba(17,26,49,.94);border:1px solid rgba(255,255,255,.07);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
+    .panel-head{padding:19px 22px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .panel-head h2{font-size:20px;margin:0}.panel-head p{margin:5px 0 0;color:var(--muted);font-size:13px}
+    .panel-body{padding:22px}
+    .flow-intro{color:var(--muted);font-size:14px;line-height:1.75;margin-bottom:18px}
+    .flow-stage{display:grid;grid-template-columns:1fr 48px 1fr 48px 1fr;align-items:center;gap:0}
+    .flow-stage + .flow-stage{margin-top:22px}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .node{min-height:96px;padding:15px;border-radius:17px;border:1px solid #31447f;background:linear-gradient(180deg,#172347,#111a35);transition:.25s}
+    .node.small{min-height:92px}.node h3{font-size:14px;margin:0 0 8px}.node p{font-size:12.5px;line-height:1.55;color:var(--muted);margin:0}
+    .node.active{border-color:var(--cyan);box-shadow:0 0 0 1px rgba(125,226,209,.28),0 0 24px rgba(125,226,209,.16);transform:translateY(-2px)}
+    .node.done{border-color:#4aa874}
+    .arrow{height:3px;margin:0 9px;border-radius:99px;background:linear-gradient(90deg,#4058a2,var(--blue));position:relative}
+    .arrow:after{content:"";position:absolute;right:-2px;top:50%;transform:translateY(-50%);border-left:10px solid var(--blue);border-top:6px solid transparent;border-bottom:6px solid transparent}
+    .vert{display:flex;justify-content:center;margin:14px 0}.vert:after{content:"↓";font-size:24px;color:var(--blue)}
+    .keyline{margin-top:22px;padding:14px 16px;border-radius:14px;background:#0e1730;border:1px solid #27386d;color:#dbe7ff;font-size:13px;line-height:1.65}
+    .keyline strong{color:#fff}
+    .section{padding:17px;border:1px solid rgba(255,255,255,.07);border-radius:16px;background:rgba(255,255,255,.025);margin-bottom:16px}
+    .section h3{margin:0 0 8px;font-size:16px}.section p{margin:0 0 13px;color:var(--muted);font-size:13px;line-height:1.6}
+    label{display:block;color:var(--muted);font-size:12px;margin:10px 0 6px}
+    input,textarea{width:100%;border-radius:12px;border:1px solid #304174;background:#0d1530;color:var(--text);padding:11px 12px;outline:none}
+    textarea{resize:vertical;min-height:110px}
+    input:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(110,168,255,.12)}
+    .buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    button{border-radius:11px;padding:10px 14px;border:none;cursor:pointer;font-weight:800;transition:.2s}
+    button:hover{transform:translateY(-1px)}
+    .primary{background:linear-gradient(135deg,#6ea8ff,#4f7ddd);color:#fff}
+    .secondary{background:#192449;border:1px solid #31447f;color:#dfe8ff}
+    .sample{padding:8px 10px;border-radius:999px;background:#162143;border:1px solid #304174;color:#cddcff;font-size:12px}
+    .status{margin-top:12px;padding:11px 12px;border-radius:11px;background:#0e1731;border:1px solid #2b3b70;color:#d6e0fb;font-size:12.5px}
+    .result{margin-top:16px;display:grid;gap:12px}
+    .card{border:1px solid #2b3b6d;background:#0f1731;border-radius:15px;padding:15px}
+    .card h4{margin:0 0 10px;font-size:14px}
+    .answer{font-size:15px;line-height:1.7}
+    .tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+    .tag{font-size:11px;font-weight:900;padding:6px 9px;border-radius:999px;border:1px solid transparent}
+    .ok{color:var(--green);background:rgba(142,230,163,.09);border-color:rgba(142,230,163,.25)}
+    .warn{color:var(--yellow);background:rgba(255,210,125,.09);border-color:rgba(255,210,125,.25)}
+    .bad{color:var(--red);background:rgba(255,149,149,.09);border-color:rgba(255,149,149,.25)}
+    .info{color:#a7c9ff;background:rgba(110,168,255,.09);border-color:rgba(110,168,255,.25)}
+    .item{border:1px solid #283969;background:#0c142b;border-radius:13px;padding:13px}
+    .item + .item{margin-top:10px}
+    .meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:11.5px;margin-bottom:8px}
+    .txt{font-size:13.5px;line-height:1.65;white-space:pre-wrap}
+    .note{font-size:12.5px;color:var(--muted);line-height:1.6}
+    @media(max-width:1100px){.layout{grid-template-columns:1fr}.hero-foot{grid-template-columns:1fr 1fr}}
+    @media(max-width:720px){.page{padding:16px}.hero{padding:24px}.hero-foot{grid-template-columns:1fr}h1{font-size:34px}.flow-stage{grid-template-columns:1fr}.arrow{height:30px;width:3px;margin:8px auto}.arrow:after{right:50%;top:auto;bottom:-6px;transform:translateX(50%);border-left:6px solid transparent;border-right:6px solid transparent;border-top:10px solid var(--blue);border-bottom:0}.split{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-  <h1>CiteTrace</h1>
-  <p class="muted">Cross-retrieval + evidence-grounded answering + independent cross-verification.</p>
-  <div class="row">
-    <section>
-      <h2>1. Upload paper</h2>
-      <input id="paperId" value="demo-paper" placeholder="paper id" />
-      <input id="pdf" type="file" accept="application/pdf" />
-      <button onclick="uploadPaper()">Ingest PDF</button>
-      <pre id="uploadOut"></pre>
+<div class="page">
+  <section class="hero">
+    <div>
+      <div class="eyebrow">CiteTrace · Classroom Demo</div>
+      <h1>科研论文事实性问答中的<br>证据溯源与幻觉抑制</h1>
+      <p>我们的目标不是让模型“回答更多”，而是让事实性回答能够追溯到论文证据，并在证据不足或不同智能体判断冲突时主动保守输出。</p>
+    </div>
+    <div class="hero-foot">
+      <div class="stat"><b>Cross-Retrieval</b><span>Qwen 与 DeepSeek 独立理解问题和检索证据</span></div>
+      <div class="stat"><b>Evidence-grounded Answer</b><span>回答只能基于共享 Evidence Pool</span></div>
+      <div class="stat"><b>Cross-Verification</b><span>DeepSeek 与 GLM 独立审核 atomic claims</span></div>
+      <div class="stat"><b>Abstention</b><span>把 disagreement 作为不确定性信号，而不是强行投票</span></div>
+    </div>
+  </section>
+
+  <div class="layout">
+    <section class="panel">
+      <div class="panel-head">
+        <div><h2>系统架构与数据流</h2><p>课堂展示主视图：先讲机制，再进行右侧 live demo</p></div>
+      </div>
+      <div class="panel-body">
+        <div class="flow-intro">普通 RAG 的核心是 <b>Retrieve → Generate</b>。CiteTrace 进一步加入独立检索、claim 级证据核查和 disagreement-aware abstention。</div>
+
+        <div class="flow-stage">
+          <div id="step-question" class="node"><h3>1 · User Question</h3><p>科研论文事实性问题，例如数据规模、训练模态、实验设置、消融结果。</p></div>
+          <div class="arrow"></div>
+          <div class="split">
+            <div id="step-r1" class="node small"><h3>2A · Qwen Retriever</h3><p>独立生成检索 query，寻找支持问题的原文证据。</p></div>
+            <div id="step-r2" class="node small"><h3>2B · DeepSeek Retriever</h3><p>从另一模型路径独立检索，降低 query formulation 导致的 evidence miss。</p></div>
+          </div>
+          <div class="arrow"></div>
+          <div id="step-pool" class="node"><h3>3 · Evidence Pool</h3><p>合并、去重并保留 page / section / source，实现可追溯证据池。</p></div>
+        </div>
+
+        <div class="vert"></div>
+
+        <div class="flow-stage">
+          <div id="step-answer" class="node"><h3>4 · Answer Agent</h3><p>只基于 Evidence Pool 回答，同时生成可独立检查的 atomic factual claims。</p></div>
+          <div class="arrow"></div>
+          <div id="step-claims" class="node"><h3>5 · Atomic Claims</h3><p>把复合答案拆成多个最小事实陈述，避免“整段 citation”掩盖局部错误。</p></div>
+          <div class="arrow"></div>
+          <div class="split">
+            <div id="step-v1" class="node small"><h3>6A · DeepSeek Verifier</h3><p>独立判断 claim 与 evidence 的支持关系。</p></div>
+            <div id="step-v2" class="node small"><h3>6B · GLM Verifier</h3><p>不看另一个 verifier 的结果，减少 anchoring。</p></div>
+          </div>
+        </div>
+
+        <div class="vert"></div>
+
+        <div class="flow-stage">
+          <div id="step-resolve" class="node"><h3>7 · Agreement / Conflict</h3><p>SUPPORTED / PARTIAL / UNSUPPORTED / UNKNOWN。冲突本身作为风险信号。</p></div>
+          <div class="arrow"></div>
+          <div id="step-final" class="node"><h3>8 · Final Output</h3><p>回答 + 原文证据 + verifier 判定；必要时主动 abstain。</p></div>
+          <div></div><div></div><div></div>
+        </div>
+
+        <div class="keyline"><strong>课堂一句话：</strong> CiteTrace 不是“多模型投票回答”，而是把不同模型放在证据检索和 claim-evidence verification 两个独立环节，用模型间 disagreement 暴露单模型可能漏掉的错误。</div>
+      </div>
     </section>
-    <section>
-      <h2>2. Ask factual question</h2>
-      <textarea id="question" rows="5" placeholder="How many demonstrations were used?"></textarea>
-      <button onclick="ask()">Ask CiteTrace</button>
-      <pre id="answerOut"></pre>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div><h2>Live Demo</h2><p>上传论文 → 提问 → 查看证据链与交叉核查</p></div>
+      </div>
+      <div class="panel-body">
+        <div class="section">
+          <h3>01 · 导入论文</h3>
+          <p>上传一篇 PDF。系统按页解析并建立可检索 evidence store。</p>
+          <label>Paper ID</label>
+          <input id="paperId" value="demo-paper" placeholder="demo-paper">
+          <label>PDF</label>
+          <input id="pdf" type="file" accept="application/pdf">
+          <div class="buttons"><button class="primary" onclick="uploadPaper()">导入论文</button><button class="secondary" onclick="checkHealth()">服务状态</button></div>
+          <div id="status" class="status">等待操作。</div>
+        </div>
+
+        <div class="section">
+          <h3>02 · 提问</h3>
+          <p>推荐依次展示：正常事实问题 → 错误前提诱导 → 无法回答问题。</p>
+          <textarea id="question" placeholder="How many robot demonstrations were used?"></textarea>
+          <div class="buttons">
+            <button class="sample" onclick="sample('How many robot demonstrations were used?')">正常事实</button>
+            <button class="sample" onclick="sample('Did the paper use 10,000 demonstrations?')">错误前提</button>
+            <button class="sample" onclick="sample('How many H100 GPUs were used for training?')">无法回答</button>
+          </div>
+          <div class="buttons"><button class="primary" onclick="ask()">运行 CiteTrace</button><button class="secondary" onclick="resetFlow()">重置流程</button></div>
+        </div>
+
+        <div class="result">
+          <div class="card">
+            <h4>最终回答</h4>
+            <div id="answerText" class="answer">尚未生成结果。</div>
+            <div id="tags" class="tags"></div>
+            <div id="answerNote" class="note" style="margin-top:10px"></div>
+          </div>
+          <div class="card">
+            <h4>Evidence Trace</h4>
+            <div id="evidenceList" class="note">提交问题后显示原文证据、页码、section 与 source。</div>
+          </div>
+          <div class="card">
+            <h4>Cross-Verification</h4>
+            <div id="verifyList" class="note">提交问题后显示各 verifier 对 atomic claims 的独立判断。</div>
+          </div>
+        </div>
+      </div>
     </section>
   </div>
+</div>
 <script>
+const steps=["step-question","step-r1","step-r2","step-pool","step-answer","step-claims","step-v1","step-v2","step-resolve","step-final"];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function status(t){document.getElementById("status").textContent=t}
+function sample(t){document.getElementById("question").value=t}
+function resetFlow(){steps.forEach(id=>{const e=document.getElementById(id);e.classList.remove("active","done")})}
+async function animateFlow(){resetFlow();for(const id of steps){const e=document.getElementById(id);e.classList.add("active");await sleep(210);e.classList.remove("active");e.classList.add("done")}}
+function esc(s){return String(s??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;")}
+function verdict(v){v=String(v||"").toLowerCase();if(v==="supported")return'<span class="tag ok">SUPPORTED</span>';if(v==="partially_supported")return'<span class="tag warn">PARTIAL</span>';if(v==="unsupported")return'<span class="tag bad">UNSUPPORTED</span>';return'<span class="tag info">UNKNOWN</span>'}
+async function checkHealth(){try{const r=await fetch("/health");status("服务状态："+JSON.stringify(await r.json()))}catch(e){status("服务检查失败："+e.message)}}
 async function uploadPaper(){
-  const f=document.getElementById('pdf').files[0];
-  const fd=new FormData();
-  fd.append('paper_id',document.getElementById('paperId').value);
-  fd.append('file',f);
-  const r=await fetch('/api/papers',{method:'POST',body:fd});
-  document.getElementById('uploadOut').textContent=JSON.stringify(await r.json(),null,2);
+  const file=document.getElementById("pdf").files[0],paperId=document.getElementById("paperId").value.trim();
+  if(!paperId)return status("请填写 paper_id。");if(!file)return status("请选择 PDF。");
+  const fd=new FormData();fd.append("paper_id",paperId);fd.append("file",file);status("正在解析 PDF 并建立 evidence store...");
+  try{const r=await fetch("/api/papers",{method:"POST",body:fd}),d=await r.json();status(r.ok?("导入成功："+d.paper_id+" · "+d.chunks+" chunks"):("导入失败："+JSON.stringify(d)))}catch(e){status("导入失败："+e.message)}
+}
+function render(d){
+  document.getElementById("answerText").textContent=d.answer||"无结果";
+  const vs=Array.isArray(d.verifications)?d.verifications:[],es=Array.isArray(d.evidences)?d.evidences:[];
+  let tags=d.abstained?'<span class="tag warn">ABSTAINED</span>':'<span class="tag ok">ANSWERED</span>';
+  if(vs.some(x=>String(x.verdict).toLowerCase()==="unsupported"))tags+='<span class="tag bad">CONFLICT / UNSUPPORTED</span>';
+  else if(vs.some(x=>String(x.verdict).toLowerCase()==="unknown"))tags+='<span class="tag info">INSUFFICIENT EVIDENCE</span>';
+  else if(vs.some(x=>String(x.verdict).toLowerCase()==="partially_supported"))tags+='<span class="tag warn">PARTIAL SUPPORT</span>';
+  else if(vs.length)tags+='<span class="tag ok">CONSISTENT SUPPORT</span>';
+  document.getElementById("tags").innerHTML=tags;document.getElementById("answerNote").textContent=d.note||"";
+  document.getElementById("evidenceList").innerHTML=es.length?es.map(function(e,i){
+    return '<div class="item"><div class="meta"><b>Evidence '+(i+1)+'</b><span>page='+(e.page??"-")+' · section='+esc(e.section||"-")+' · source='+esc(e.source||"-")+'</span></div><div class="txt">'+esc(e.text)+'</div></div>';
+  }).join(""):'<div class="note">没有可展示的 evidence。</div>';
+  document.getElementById("verifyList").innerHTML=vs.length?vs.map(function(v,i){
+    return '<div class="item"><div class="meta"><b>Verification '+(i+1)+'</b><span>'+esc(v.verifier||"-")+' · confidence='+Number(v.confidence??0).toFixed(2)+'</span></div><div class="tags" style="margin:0 0 8px">'+verdict(v.verdict)+'</div><div class="txt"><b>Claim:</b> '+esc(v.claim)+'</div><div class="txt" style="margin-top:6px"><b>Reason:</b> '+esc(v.reason)+'</div></div>';
+  }).join(""):'<div class="note">没有 verifier 输出。</div>';
 }
 async function ask(){
-  const fd=new FormData();
-  fd.append('paper_id',document.getElementById('paperId').value);
-  fd.append('question',document.getElementById('question').value);
-  const r=await fetch('/api/ask',{method:'POST',body:fd});
-  document.getElementById('answerOut').textContent=JSON.stringify(await r.json(),null,2);
+  const paperId=document.getElementById("paperId").value.trim(),q=document.getElementById("question").value.trim();
+  if(!paperId)return status("请填写 paper_id。");if(!q)return status("请输入问题。");
+  status("运行中：Cross-Retrieval → Evidence-grounded Answer → Cross-Verification...");animateFlow();
+  const fd=new FormData();fd.append("paper_id",paperId);fd.append("question",q);
+  try{const r=await fetch("/api/ask",{method:"POST",body:fd}),d=await r.json();if(!r.ok)return status("请求失败："+JSON.stringify(d));render(d);status("推理完成。可结合左侧数据流讲解结果。")}catch(e){status("请求失败："+e.message)}
 }
 </script>
 </body>
