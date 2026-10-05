@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import argparse
 import json
+from dataclasses import asdict
 from pathlib import Path
 
-from dataclasses import asdict
+from dotenv import load_dotenv
 
 from citetrace.aggregation.conservative import ConservativeAggregator
 from citetrace.answer.agent import EvidenceAnswerAgent
@@ -36,6 +37,8 @@ def build_pipeline(store: JsonPaperStore) -> CiteTracePipeline:
 
 
 def main() -> None:
+    load_dotenv()
+
     parser = argparse.ArgumentParser(description="CiteTrace CLI")
     sub = parser.add_subparsers(dest="command", required=True)
 
