@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CiteTrace</title>
+  <style>
+    body{font-family:system-ui,sans-serif;max-width:900px;margin:40px auto;padding:0 20px;line-height:1.45}
+    textarea,input,button{font:inherit} input,textarea{width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box}
+    button{padding:9px 14px;cursor:pointer} pre{white-space:pre-wrap;background:#f5f5f5;padding:16px;border-radius:8px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:24px}.muted{opacity:.7}
+  </style>
+</head>
+<body>
+  <h1>CiteTrace</h1>
+  <p class="muted">Cross-retrieval + evidence-grounded answering + independent cross-verification.</p>
+  <div class="row">
+    <section>
+      <h2>1. Upload paper</h2>
+      <input id="paperId" value="demo-paper" placeholder="paper id" />
+      <input id="pdf" type="file" accept="application/pdf" />
+      <button onclick="uploadPaper()">Ingest PDF</button>
+      <pre id="uploadOut"></pre>
+    </section>
+    <section>
+      <h2>2. Ask factual question</h2>
+      <textarea id="question" rows="5" placeholder="How many demonstrations were used?"></textarea>
+      <button onclick="ask()">Ask CiteTrace</button>
+      <pre id="answerOut"></pre>
+    </section>
+  </div>
+<script>
+async function uploadPaper(){
+  const f=document.getElementById('pdf').files[0];
+  const fd=new FormData();
+  fd.append('paper_id',document.getElementById('paperId').value);
+  fd.append('file',f);
+  const r=await fetch('/api/papers',{method:'POST',body:fd});
+  document.getElementById('uploadOut').textContent=JSON.stringify(await r.json(),null,2);
+}
+async function ask(){
+  const fd=new FormData();
+  fd.append('paper_id',document.getElementById('paperId').value);
+  fd.append('question',document.getElementById('question').value);
+  const r=await fetch('/api/ask',{method:'POST',body:fd});
+  document.getElementById('answerOut').textContent=JSON.stringify(await r.json(),null,2);
+}
+</script>
+</body>
+</html>
