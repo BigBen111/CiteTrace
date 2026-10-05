@@ -1,0 +1,26 @@
+[
+  {
+    "id": "answerable_001",
+    "paper_id": "example",
+    "category": "answerable",
+    "question": "How many trajectories were collected?",
+    "reference_answer": "approximately 1,000 trajectories",
+    "should_abstain": false
+  },
+  {
+    "id": "misleading_001",
+    "paper_id": "example",
+    "category": "misleading",
+    "question": "Did the authors collect 10,000 trajectories?",
+    "reference_answer": "No; the paper states approximately 1,000 trajectories.",
+    "should_abstain": false
+  },
+  {
+    "id": "unanswerable_001",
+    "paper_id": "example",
+    "category": "unanswerable",
+    "question": "How many H100 GPUs were used for training?",
+    "reference_answer": null,
+    "should_abstain": true
+  }
+]
