@@ -1,0 +1,1 @@
+Read the retrieved passages from the paper and answer the user's question.
