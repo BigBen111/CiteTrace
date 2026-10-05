@@ -145,3 +145,21 @@ docs/              architecture contract
 7. New methods should implement existing interfaces rather than rewrite orchestration.
 
 See `docs/ARCHITECTURE.md` before modifying the core interfaces.
+
+
+## Web demo
+
+For the classroom demo:
+
+```bash
+pip install -e ".[web]"
+uvicorn citetrace.server:app --host 0.0.0.0 --port 8000
+```
+
+Or with Docker:
+
+```bash
+docker compose up --build
+```
+
+Then open port 8000. The demo page supports PDF ingestion and factual questions and shows the full structured result, including evidence and verifier judgments.
