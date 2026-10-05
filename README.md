@@ -1,14 +1,14 @@
 # CiteTrace
 
-**CiteTrace** is a modular multi-agent system for factual question answering over research papers.
+CiteTrace is a modular multi-agent system for **factual question answering over research papers**.
 
-Its goal is not to answer every question. Its goal is to reduce **unsupported factual claims** by grounding answers in paper evidence, independently verifying atomic claims, and abstaining when the evidence is insufficient or conflicting.
+The system is intentionally narrow: it does not try to be a general paper-reading assistant. Its objective is to reduce **unsupported factual claims** by requiring traceable paper evidence, independent claim verification, and abstention when evidence is insufficient or conflicting.
 
 ## Core research question
 
 Can heterogeneous multi-agent cross-checking improve the reliability of factual question answering over research papers compared with a single-model or ordinary RAG pipeline?
 
-## Core pipeline
+## Architecture
 
 ```text
 Question
@@ -32,54 +32,116 @@ Question
                     Answer / Qualify / Abstain
 ```
 
-### 1. Cross Retrieval
-Multiple retrieval agents independently analyze the same question, generate retrieval queries, and select evidence. Their evidence is merged into a shared evidence pool.
+### Cross Retrieval
 
-Purpose: reduce evidence misses caused by a single model's query formulation.
+Each retrieval agent independently interprets the same user question and generates its own retrieval queries. Results are merged and de-duplicated.
 
-### 2. Evidence-grounded Answering
-The answer agent may only answer from the supplied evidence pool. It must separate explicit statements, justified inference, and unknown information.
+Purpose: reduce evidence misses caused by one model's query formulation.
 
-### 3. Atomic Claim Extraction
-Generated answers are split into independently checkable factual claims.
+### Evidence-grounded Answering
 
-### 4. Cross Verification
-Multiple verifier agents independently judge the same claim against the same evidence. Verifiers do not see one another's verdicts.
+The answer agent only sees the question and the shared Evidence Pool. It returns both a readable answer and atomic factual claims.
 
-Possible verdicts:
+### Cross Verification
+
+Each atomic claim is independently checked by multiple verifier agents against the same original paper evidence. First-pass verifiers do not see each other's verdicts.
+
+Verdicts:
+
 - `SUPPORTED`
 - `PARTIALLY_SUPPORTED`
 - `UNSUPPORTED`
 - `UNKNOWN`
 
-### 5. Disagreement-aware Resolution
-Agreement allows an answer to pass. Conflicts trigger conservative qualification, re-checking, or abstention.
+### Disagreement-aware Resolution
 
-Agent disagreement is treated as an uncertainty signal rather than resolved by naive majority voting.
+CiteTrace does not use naive majority voting. Verifier disagreement is treated as an uncertainty signal. The first implementation is deliberately conservative and abstains when material support is disputed or insufficient.
 
-## Design principles
+## Default agent layout
 
-1. **Evidence before answer.**
-2. **No model verifies its own claim by default.**
-3. **Independent first-pass verification.**
-4. **Retrieval failure is not equivalent to “the paper does not contain this information.”**
-5. **Abstention is a valid output.**
-6. **All major components expose stable interfaces so models or algorithms can be swapped independently.**
+The current runnable configuration is:
 
-## Repository structure
+- Retrieval Agent A: Qwen
+- Retrieval Agent B: DeepSeek
+- Answer Agent: Qwen
+- Verifier A: DeepSeek
+- Verifier B: GLM
+
+All roles use stable interfaces, so models can be swapped without changing the pipeline.
+
+## Quick start
+
+```bash
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -e ".[dev]"
+cp .env.example .env
+```
+
+Fill the API keys, model names, and OpenAI-compatible base URLs in `.env`.
+
+### Ingest a paper
+
+```bash
+citetrace ingest ./paper.pdf --paper-id demo-paper
+```
+
+### Ask a factual question
+
+```bash
+citetrace ask --paper-id demo-paper "How many robot demonstrations were used?"
+```
+
+The result contains:
+
+- final answer
+- retrieved evidence with page/section/source
+- per-claim verifier verdicts
+- abstention state and reason
+
+## Evaluation
+
+The required evaluation categories are:
+
+1. answerable factual questions
+2. misleading questions containing false premises
+3. unanswerable questions
+
+A starter schema and runner are in `evaluation/`.
+
+The main comparison should separate:
+
+- ordinary/single-path RAG baseline
+- evidence-constrained answering
+- evidence-constrained answering + heterogeneous cross verification
+
+This is important because a system can appear to hallucinate less simply by refusing more questions.
+
+## Project structure
 
 ```text
 citetrace/
-  schemas.py
-  pipeline.py
-  retrieval/
-  answer/
-  verification/
-  aggregation/
-  llm/
-prompts/
-evaluation/
-tests/
+  paper/           PDF parsing and evidence store
+  llm/             provider-agnostic LLM adapters
+  retrieval/       cross-retrieval agents
+  answer/          evidence-grounded answer agent
+  verification/    independent claim verifiers
+  aggregation/     disagreement-aware resolver
+  pipeline.py      orchestration only
+prompts/           reproducible prompt library
+evaluation/        hallucination/abstention evaluation
+tests/             unit tests
+docs/              architecture contract
 ```
 
-The initial repository intentionally focuses on the core architecture. UI, deployment, databases, and other product details are secondary and should not leak into the core interfaces.
+## Design principles
+
+1. Evidence before answer.
+2. No model verifies its own claim by default.
+3. First-pass verifiers are independent.
+4. Retrieval failure is not equivalent to “the paper does not contain this information.”
+5. Abstention is a valid output.
+6. Provider-specific SDK objects never enter the core pipeline.
+7. New methods should implement existing interfaces rather than rewrite orchestration.
+
+See `docs/ARCHITECTURE.md` before modifying the core interfaces.
