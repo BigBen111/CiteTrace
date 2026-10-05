@@ -5,12 +5,19 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "citetrace"
 version = "0.1.0"
-description = "Multi-agent evidence tracing for research-paper factual QA"
+description = "Multi-agent evidence tracing and hallucination suppression for research-paper factual QA"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+  "openai>=1.50",
+  "pymupdf>=1.24",
+  "python-dotenv>=1.0",
+]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+
+[project.scripts]
+citetrace = "citetrace.app:main"
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
