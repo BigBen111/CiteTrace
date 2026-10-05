@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import json
 from typing import Sequence
 
 from citetrace.llm.base import BaseLLM
 from citetrace.schemas import Evidence, VerificationResult, Verdict
+from citetrace.utils.json import parse_json_object
 from citetrace.verification.base import BaseVerifier
 
 
@@ -40,7 +40,7 @@ class LLMVerifier(BaseVerifier):
             f"Claim:\n{claim}\n\nEvidence:\n{evidence_text}",
         )
         try:
-            obj = json.loads(raw)
+            obj = parse_json_object(raw)
             verdict = Verdict(str(obj["verdict"]).lower())
             confidence = max(0.0, min(1.0, float(obj.get("confidence", 0.5))))
             reason = str(obj.get("reason", "")).strip()
