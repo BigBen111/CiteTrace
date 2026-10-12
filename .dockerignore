@@ -1,0 +1,12 @@
+.git
+.env
+config
+data
+artifacts
+.venv
+__pycache__
+*.py[cod]
+.pytest_cache
+course_deliverables
+tests
+.github

@@ -1,0 +1,3 @@
+{$CITETRACE_DOMAIN} {
+    reverse_proxy citetrace:8000
+}

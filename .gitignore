@@ -8,3 +8,7 @@ __pycache__/
 venv/
 data/
 artifacts/
+course_deliverables/
+*.pem
+*.key
+node_modules/

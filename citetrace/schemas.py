@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 
 class Verdict(str, Enum):
@@ -20,12 +20,19 @@ class Evidence:
     score: Optional[float] = None
     source: Optional[str] = None
     agent: Optional[str] = None
+    evidence_id: Optional[str] = None
+    matched_term: Optional[str] = None
+    match_type: Optional[str] = None
+    relation: Optional[str] = None
+    validated: Optional[bool] = None
 
 
 @dataclass
 class AnswerDraft:
     text: str
     claims: List[str] = field(default_factory=list)
+    insufficient: bool = False
+    claim_evidence_ids: Dict[str, List[str]] = field(default_factory=dict)
 
 
 @dataclass
@@ -35,6 +42,7 @@ class VerificationResult:
     confidence: float
     reason: str
     verifier: str
+    evidence_ids: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -44,3 +52,5 @@ class FinalResult:
     verifications: List[VerificationResult]
     abstained: bool = False
     note: Optional[str] = None
+    workflow: str = "agentic_qa"
+    coverage: Optional[Dict[str, Any]] = None

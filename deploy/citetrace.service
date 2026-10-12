@@ -1,0 +1,19 @@
+[Unit]
+Description=CiteTrace web application
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=citetrace
+Group=citetrace
+WorkingDirectory=/opt/citetrace
+Environment=CITETRACE_CONFIG_DIR=/opt/citetrace/config
+ExecStart=/opt/citetrace/.venv/bin/uvicorn citetrace.server:app --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

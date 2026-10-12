@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Sequence
+from typing import Callable, Sequence
 
 from citetrace.llm.base import BaseLLM
 from citetrace.schemas import Evidence, VerificationResult, Verdict
@@ -8,9 +8,16 @@ from citetrace.utils.json import parse_json_object
 from citetrace.verification.base import BaseVerifier
 
 
-_SYSTEM = """You are an independent claim-evidence verifier.
+_SYSTEM = """You are a strict, independent claim-evidence verifier.
 Judge ONLY whether the supplied evidence supports the atomic claim.
 Do not use outside knowledge and do not infer that missing evidence proves absence.
+
+Important distinctions:
+- A bibliography entry supports "the paper cites X" only.
+- It does not support stronger claims that the paper uses, discusses, compares, or
+  evaluates X unless other evidence explicitly says so.
+- Verify every material detail, including numbers, names, dates, and relationship verbs.
+- Prefer unknown over unsupported when relevant evidence is simply missing.
 
 Verdicts:
 - supported: evidence directly supports the claim.
@@ -21,7 +28,7 @@ Verdicts:
 Return strict JSON:
 {"verdict":"supported|partially_supported|unsupported|unknown",
  "confidence":0.0,
- "reason":"brief evidence-grounded reason"}
+ "reason":"brief reason naming the decisive [E#] evidence or the missing support"}
 """
 
 
@@ -30,9 +37,17 @@ class LLMVerifier(BaseVerifier):
         self.name = name
         self.llm = llm
 
+    def set_progress(
+        self, progress: Callable[[str, str], None] | None
+    ) -> None:
+        setter = getattr(self.llm, "set_progress", None)
+        if callable(setter):
+            setter(progress)
+
     def verify(self, claim: str, evidences: Sequence[Evidence]) -> VerificationResult:
         evidence_text = "\n\n".join(
-            f"[E{i}] page={e.page} source={e.source}\n{e.text}"
+            f"[{e.evidence_id or f'E{i}'}] page={e.page} source={e.source} "
+            f"validated={e.validated}\n{e.text}"
             for i, e in enumerate(evidences, 1)
         )
         raw = self.llm.complete(
@@ -55,4 +70,7 @@ class LLMVerifier(BaseVerifier):
             confidence=confidence,
             reason=reason,
             verifier=self.name,
+            evidence_ids=[
+                evidence.evidence_id for evidence in evidences if evidence.evidence_id
+            ],
         )
